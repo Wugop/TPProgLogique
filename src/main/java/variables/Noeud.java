@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Noeud {
     protected int id;
-    public final Integer[] domaine = {1,2,3,4,5};
+    public final Integer[] domaine = {1,2,3,4};
     public List<Integer> listDomaine;
 
     public Noeud (int id) {

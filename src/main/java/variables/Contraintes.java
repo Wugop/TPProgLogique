@@ -1,9 +1,7 @@
 package variables;
 
-import variables.Noeud;
-import variables.Pair;
-
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Contraintes {
@@ -19,6 +17,17 @@ public class Contraintes {
         for (int i = 0; i < noeudsPair.getLeft().domaine.length; i++)
             for (int j = 0; j < noeudsPair.getRight().domaine.length; j++)
                 this.coupleList.add(new Pair<>(noeudsPair.getLeft().domaine[i], noeudsPair.getRight().domaine[j]));
+    }
+
+    public void generateListValueNQueen() {
+        generateListValue();
+        Iterator<Pair<Integer, Integer>> it = coupleList.listIterator();
+        while(it.hasNext()) {
+            Pair<Integer,Integer> pair = it.next();
+            if(pair.getLeft().equals(pair.getRight()) || ((noeudsPair.getLeft().id - noeudsPair.getRight().id) + (pair.getLeft() - pair.getRight())) == 0)
+                this.coupleList.remove(pair);
+            it.remove();
+        }
     }
 
     public List<Pair<Integer, Integer>> getCoupleList() {
