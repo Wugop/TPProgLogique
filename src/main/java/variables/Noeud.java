@@ -14,6 +14,9 @@ public class Noeud {
         listDomaine = new ArrayList<>(Arrays.asList(domaine));
     }
 
+    public void reinitListDomaine() {
+        listDomaine = new ArrayList<>(Arrays.asList(domaine));
+    }
     public List<Integer> getListDomaine() {
         return listDomaine;
     }

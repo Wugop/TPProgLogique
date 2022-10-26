@@ -21,13 +21,7 @@ public class Contraintes {
 
     public void generateListValueNQueen() {
         generateListValue();
-        Iterator<Pair<Integer, Integer>> it = coupleList.listIterator();
-        while(it.hasNext()) {
-            Pair<Integer,Integer> pair = it.next();
-            if(pair.getLeft().equals(pair.getRight()) || ((noeudsPair.getLeft().id - noeudsPair.getRight().id) + (pair.getLeft() - pair.getRight())) == 0)
-                this.coupleList.remove(pair);
-            it.remove();
-        }
+        this.coupleList.removeIf(pair -> pair.getLeft().equals(pair.getRight()) || Math.abs(noeudsPair.getLeft().id - noeudsPair.getRight().id) == Math.abs(pair.getLeft() - pair.getRight()));
     }
 
     public List<Pair<Integer, Integer>> getCoupleList() {
@@ -36,7 +30,7 @@ public class Contraintes {
 
     @Override
     public String toString() {
-        return "Contraintes entre noeud " + noeudsPair.getLeft().id + "et noeud " + noeudsPair.getRight().id + " : " +
+        return "Contraintes entre noeud " + noeudsPair.getLeft().id + " et noeud " + noeudsPair.getRight().id + " : " +
                 coupleList;
     }
 }
