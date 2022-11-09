@@ -51,6 +51,9 @@ public class CSP {
     }
 
 
+    /**
+     * Vérifie les contraintes
+     */
     public boolean coherentAssign(List<Integer> listSoluce) {
         boolean ok = true;
         for (int i = 0; i < listSoluce.size() - 1; i++) {
@@ -77,6 +80,16 @@ public class CSP {
             }
         }
         return ok;
+    }
+
+    public boolean coherentAssignBackjumping(int a, int b,int valueA, int valueB) {
+        boolean coherent = false;
+        for (Contraintes c : this.contraintesList) {
+            if (c.noeudsPair.getLeft().id == a + 1 && c.noeudsPair.getRight().id == b + 1)
+                if(c.coupleList.contains(new Pair<>(valueA,valueB)))
+                    coherent = true;
+        }
+        return coherent;
     }
 
     public void backTracking() {
@@ -124,8 +137,7 @@ public class CSP {
                 listSoluce.remove(i);
                 n.reinitListDomaine();
                 i--;
-            }
-            else
+            } else
                 i++;
         }
         if (i == -1)
@@ -134,11 +146,52 @@ public class CSP {
             System.out.println(listSoluce);
     }
 
+
+    public void backjumping() {
+        int i = 0;
+        int coupable = -1;
+        List<Integer> listSoluce = new ArrayList<>();
+        while (i > -1 && i < this.noeudList.size()) {
+            Noeud n = this.noeudList.get(i);
+            boolean ok = false;
+            while (!ok && !n.getListDomaine().isEmpty()) {
+                if (n.getListDomaine().size() == n.domaine.length)
+                    listSoluce.add(n.getListDomaine().get(0));
+                else
+                    listSoluce.set(i, n.getListDomaine().get(0));
+                n.getListDomaine().remove(0);
+                boolean consistant = true;
+                int k = 0;
+                while (k < i && consistant) {
+                    if (k > coupable) coupable = k;
+                    int tmp = 0;
+                    while (tmp < k+1) {
+                        //On cherche un conflit, donc il faut que l'assignation ne soit pas cohérente
+                        if (!(coherentAssignBackjumping(tmp, i,listSoluce.get(tmp),listSoluce.get(i))) && !coherentAssignNQueen(listSoluce)) {
+                            consistant = false;
+                            break;
+                        } else tmp++;
+                    }
+                    k++;
+                }
+                if (consistant) ok = true;
+            }
+            if (!ok) {
+                i = coupable;
+                for (int temp = i + 1; temp < this.noeudList.size(); temp++)
+                    this.noeudList.get(temp).reinitListDomaine();
+            } else {
+                i++;
+                coupable = -1;
+            }
+        }
+        if (i < 0) System.out.println("UNSAT");
+        else System.out.println(listSoluce);
+    }
+
     public static void main(String[] args) {
         CSP csp = new CSP(4, true);
-        System.out.println(csp);
-        csp.backTrackingNQueen();
-
+        csp.backjumping();
     }
 }
 
