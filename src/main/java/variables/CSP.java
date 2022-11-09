@@ -82,11 +82,11 @@ public class CSP {
         return ok;
     }
 
-    public boolean coherentAssignBackjumping(int a, int b,int valueA, int valueB) {
+    public boolean coherentAssignBackjumping(int a, int b, int valueA, int valueB) {
         boolean coherent = false;
         for (Contraintes c : this.contraintesList) {
             if (c.noeudsPair.getLeft().id == a + 1 && c.noeudsPair.getRight().id == b + 1)
-                if(c.coupleList.contains(new Pair<>(valueA,valueB)))
+                if (c.coupleList.contains(new Pair<>(valueA, valueB)))
                     coherent = true;
         }
         return coherent;
@@ -164,13 +164,10 @@ public class CSP {
                 int k = 0;
                 while (k < i && consistant) {
                     if (k > coupable) coupable = k;
-                    int tmp = 0;
-                    while (tmp < k+1) {
-                        //On cherche un conflit, donc il faut que l'assignation ne soit pas cohérente
-                        if (!(coherentAssignBackjumping(tmp, i,listSoluce.get(tmp),listSoluce.get(i))) && !coherentAssignNQueen(listSoluce)) {
-                            consistant = false;
-                            break;
-                        } else tmp++;
+                    //On cherche un conflit, donc il faut que l'assignation ne soit pas cohérente
+                    if (!(coherentAssignBackjumping(k, i, listSoluce.get(k), listSoluce.get(i))) /*&& coherentAssignNQueen(listSoluce)*/) {
+                        consistant = false;
+                        break;
                     }
                     k++;
                 }
@@ -178,8 +175,11 @@ public class CSP {
             }
             if (!ok) {
                 i = coupable;
-                for (int temp = i + 1; temp < this.noeudList.size(); temp++)
+                int tempListSize = listSoluce.size();
+                for (int temp = i + 1; temp < tempListSize; temp++) {
                     this.noeudList.get(temp).reinitListDomaine();
+                    listSoluce.remove(i + 1);
+                }
             } else {
                 i++;
                 coupable = -1;
