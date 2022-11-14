@@ -207,6 +207,8 @@ public class CSP {
             Noeud n = this.noeudList.get(i);
             boolean ok = false;
             while (!ok && !n.getListDomaine().isEmpty()) {
+
+                //Recup valeur du domaine - les contraintes dans la map
                 if (n.getListDomaine().size() == n.initialDomaine.size())
                     listSoluce.add(n.getListDomaine().get(0));
                 else
@@ -220,7 +222,7 @@ public class CSP {
                     mapContrainte.get(k).get(i).add(listSoluce.get(i) + coef);
                     coef++;
                     Set<Integer> completeList = new HashSet<>();
-                    for(int temp = 0;temp<k;k++)
+                    for(int temp = 0;temp<k;temp++)
                         completeList.addAll(mapContrainte.get(k).get(temp));
                     if(completeList.containsAll(noeudList.get(i).initialDomaine))
                         domaineVide = true;
@@ -250,10 +252,12 @@ public class CSP {
 
 
     public static void main(String[] args) {
-        CSP csp = new CSP(19, true);
+        CSP csp = new CSP(4, true);
         csp.backjumping();
-        CSP csp2 = new CSP(6, true);
+        CSP csp2 = new CSP(4, true);
         csp2.backTrackingNQueen();
+        CSP csp3 = new CSP(5, true);
+        csp3.forwardchecking();
 
     }
 }
