@@ -6,18 +6,24 @@ import java.util.List;
 
 public class Noeud {
     protected int id;
-    public final Integer[] domaine = {1,2,3,4};
+    public List<Integer> initialDomaine;
     public List<Integer> listDomaine;
 
     public Noeud (int id) {
         this.id = id;
-        listDomaine = new ArrayList<>(Arrays.asList(domaine));
     }
 
     public void reinitListDomaine() {
-        listDomaine = new ArrayList<>(Arrays.asList(domaine));
+        listDomaine = new ArrayList<>(initialDomaine);
     }
     public List<Integer> getListDomaine() {
         return listDomaine;
+    }
+
+    public void setDomaine(int nbVar) {
+        initialDomaine = new ArrayList<>();
+        for(int i = 1; i<=nbVar;i++)
+            initialDomaine.add(i);
+        listDomaine = new ArrayList<>(initialDomaine);
     }
 }

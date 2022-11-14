@@ -14,9 +14,9 @@ public class Contraintes {
     }
 
     public void generateListValue() {
-        for (int i = 0; i < noeudsPair.getLeft().domaine.length; i++)
-            for (int j = 0; j < noeudsPair.getRight().domaine.length; j++)
-                this.coupleList.add(new Pair<>(noeudsPair.getLeft().domaine[i], noeudsPair.getRight().domaine[j]));
+        for (int i = 0; i < noeudsPair.getLeft().initialDomaine.size(); i++)
+            for (int j = 0; j < noeudsPair.getRight().initialDomaine.size(); j++)
+                this.coupleList.add(new Pair<>(noeudsPair.getLeft().initialDomaine.get(i), noeudsPair.getRight().initialDomaine.get(j)));
     }
 
     public void generateListValueNQueen() {

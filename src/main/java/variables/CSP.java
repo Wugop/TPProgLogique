@@ -1,8 +1,6 @@
 package variables;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class CSP {
     private List<Noeud> noeudList;
@@ -33,8 +31,10 @@ public class CSP {
     public CSP(int nbVar, boolean nQueen) {
         this.noeudList = new ArrayList<>();
         this.contraintesList = new ArrayList<>();
-        for (int i = 1; i <= nbVar; i++)
+        for (int i = 1; i <= nbVar; i++) {
             this.noeudList.add(new Noeud(i));
+            this.noeudList.get(noeudList.size() - 1).setDomaine(nbVar);
+        }
         for (int i = 0; i < nbVar - 1; i++)
             for (int j = i + 1; j < nbVar; j++)
                 this.contraintesList.add(new Contraintes(noeudList.get(i), noeudList.get(j)));
@@ -99,7 +99,7 @@ public class CSP {
             Noeud n = this.noeudList.get(i);
             boolean ok = false;
             while (!ok && !n.getListDomaine().isEmpty()) {
-                if (n.getListDomaine().size() == n.domaine.length)
+                if (n.getListDomaine().size() == n.initialDomaine.size())
                     listSoluce.add(n.getListDomaine().get(0));
                 else
                     listSoluce.set(i, n.getListDomaine().get(0));
@@ -125,7 +125,7 @@ public class CSP {
             Noeud n = this.noeudList.get(i);
             boolean ok = false;
             while (!ok && !n.getListDomaine().isEmpty()) {
-                if (n.getListDomaine().size() == n.domaine.length)
+                if (n.getListDomaine().size() == n.initialDomaine.size())
                     listSoluce.add(n.getListDomaine().get(0));
                 else
                     listSoluce.set(i, n.getListDomaine().get(0));
@@ -155,7 +155,7 @@ public class CSP {
             Noeud n = this.noeudList.get(i);
             boolean ok = false;
             while (!ok && !n.getListDomaine().isEmpty()) {
-                if (n.getListDomaine().size() == n.domaine.length)
+                if (n.getListDomaine().size() == n.initialDomaine.size())
                     listSoluce.add(n.getListDomaine().get(0));
                 else
                     listSoluce.set(i, n.getListDomaine().get(0));
@@ -165,16 +165,18 @@ public class CSP {
                 while (k < i && consistant) {
                     if (k > coupable) coupable = k;
                     //On cherche un conflit, donc il faut que l'assignation ne soit pas cohérente
-                    if (!(coherentAssignBackjumping(k, i, listSoluce.get(k), listSoluce.get(i))) /*&& coherentAssignNQueen(listSoluce)*/) {
+                    if (!(coherentAssignBackjumping(k, i, listSoluce.get(k), listSoluce.get(i))) /*&& !coherentAssignNQueen(listSoluce)*/)
                         consistant = false;
-                        break;
-                    }
-                    k++;
+                    else
+                        k++;
                 }
                 if (consistant) ok = true;
             }
             if (!ok) {
-                i = coupable;
+                if (n.getListDomaine().isEmpty() && coupable == -1)
+                    i--;
+                else
+                    i = coupable;
                 int tempListSize = listSoluce.size();
                 for (int temp = i + 1; temp < tempListSize; temp++) {
                     this.noeudList.get(temp).reinitListDomaine();
@@ -182,16 +184,77 @@ public class CSP {
                 }
             } else {
                 i++;
-                coupable = -1;
             }
+            coupable = -1;
         }
         if (i < 0) System.out.println("UNSAT");
         else System.out.println(listSoluce);
     }
 
+    public void forwardchecking() {
+        int i = 0;
+        List<Integer> listSoluce = new ArrayList<>();
+
+        //initialisation de la map qui va gérer les contraintes pour le forwardchecking
+        Map<Integer, Map<Integer, List<Integer>>> mapContrainte = new HashMap<>();
+        for (int temp = 1; temp < noeudList.size(); temp++) {
+            mapContrainte.put(temp, new HashMap<>());
+            for (int temp2 = 0; temp2 < temp; temp2++)
+                mapContrainte.get(temp).put(temp2, new ArrayList<>());
+        }
+
+        while (i > -1 && i < this.noeudList.size()) {
+            Noeud n = this.noeudList.get(i);
+            boolean ok = false;
+            while (!ok && !n.getListDomaine().isEmpty()) {
+                if (n.getListDomaine().size() == n.initialDomaine.size())
+                    listSoluce.add(n.getListDomaine().get(0));
+                else
+                    listSoluce.set(i, n.getListDomaine().get(0));
+                n.getListDomaine().remove(0);
+                boolean domaineVide = false;
+                int coef = 1;
+                for (int k = i + 1; k < this.noeudList.size(); k++) {
+                    mapContrainte.get(k).get(i).add(listSoluce.get(i) - coef);
+                    mapContrainte.get(k).get(i).add(listSoluce.get(i));
+                    mapContrainte.get(k).get(i).add(listSoluce.get(i) + coef);
+                    coef++;
+                    Set<Integer> completeList = new HashSet<>();
+                    for(int temp = 0;temp<k;k++)
+                        completeList.addAll(mapContrainte.get(k).get(temp));
+                    if(completeList.containsAll(noeudList.get(i).initialDomaine))
+                        domaineVide = true;
+                }
+                if (domaineVide)
+                    for (int k = i + 1; k < this.noeudList.size(); k++)
+                        mapContrainte.get(k).get(i).clear();
+                else
+                    ok = true;
+            }
+            if (!ok) {
+                for (int k = i + 1; k < this.noeudList.size(); k++)
+                    mapContrainte.get(k).get(i).clear();
+                i--;
+            } else
+                i++;
+        }
+        if (i < 0)
+            System.out.println("UNSAT");
+        else
+            System.out.println(listSoluce);
+    }
+
+    private void ReviseNqueen(Map<Integer, Map<Integer, List<Integer>>> mapContrainte, int k, int i) {
+
+    }
+
+
     public static void main(String[] args) {
-        CSP csp = new CSP(4, true);
+        CSP csp = new CSP(19, true);
         csp.backjumping();
+        CSP csp2 = new CSP(6, true);
+        csp2.backTrackingNQueen();
+
     }
 }
 
