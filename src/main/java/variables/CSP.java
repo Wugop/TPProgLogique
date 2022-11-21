@@ -1,6 +1,7 @@
 package variables;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CSP {
     private List<Noeud> noeudList;
@@ -194,7 +195,6 @@ public class CSP {
     public void forwardchecking() {
         int i = 0;
         List<Integer> listSoluce = new ArrayList<>();
-
         //initialisation de la map qui va gérer les contraintes pour le forwardchecking
         Map<Integer, Map<Integer, List<Integer>>> mapContrainte = new HashMap<>();
         for (int temp = 1; temp < noeudList.size(); temp++) {
@@ -207,9 +207,8 @@ public class CSP {
             Noeud n = this.noeudList.get(i);
             boolean ok = false;
             while (!ok && !n.getListDomaine().isEmpty()) {
-
                 //Recup valeur du domaine - les contraintes dans la map
-                if (n.getListDomaine().size() == n.initialDomaine.size())
+                if (listSoluce.size() == i)
                     listSoluce.add(n.getListDomaine().get(0));
                 else
                     listSoluce.set(i, n.getListDomaine().get(0));
@@ -217,15 +216,20 @@ public class CSP {
                 boolean domaineVide = false;
                 int coef = 1;
                 for (int k = i + 1; k < this.noeudList.size(); k++) {
+                    mapContrainte.get(k).get(i).clear();
                     mapContrainte.get(k).get(i).add(listSoluce.get(i) - coef);
                     mapContrainte.get(k).get(i).add(listSoluce.get(i));
                     mapContrainte.get(k).get(i).add(listSoluce.get(i) + coef);
                     coef++;
                     Set<Integer> completeList = new HashSet<>();
-                    for(int temp = 0;temp<k;temp++)
+                    for (int temp = 0; temp < k; temp++)
                         completeList.addAll(mapContrainte.get(k).get(temp));
-                    if(completeList.containsAll(noeudList.get(i).initialDomaine))
+                    if (completeList.containsAll(noeudList.get(i).initialDomaine))
                         domaineVide = true;
+                    else {
+                        noeudList.get(k).reinitListDomaine();
+                        noeudList.get(k).getListDomaine().removeAll(completeList);
+                    }
                 }
                 if (domaineVide)
                     for (int k = i + 1; k < this.noeudList.size(); k++)
@@ -236,6 +240,8 @@ public class CSP {
             if (!ok) {
                 for (int k = i + 1; k < this.noeudList.size(); k++)
                     mapContrainte.get(k).get(i).clear();
+                noeudList.get(i).reinitListDomaine();
+                listSoluce.remove(i);
                 i--;
             } else
                 i++;
@@ -256,7 +262,7 @@ public class CSP {
         csp.backjumping();
         CSP csp2 = new CSP(4, true);
         csp2.backTrackingNQueen();
-        CSP csp3 = new CSP(5, true);
+        CSP csp3 = new CSP(4, true);
         csp3.forwardchecking();
 
     }
